@@ -1,5 +1,6 @@
 import { type Page, type Response } from "patchright";
 import HTTPStatusCodes from "http-status-codes";
+import Clipboard from "@crosscopy/clipboard";
 
 import { createUniqueId } from "./utils";
 
@@ -99,7 +100,7 @@ export class Session {
   // actions
 
   async clickOn(selector: string): Promise<void> {
-    await this.page.click(selector);
+    await this.page.locator(selector).click();
   }
 
   async navigateTo(
@@ -142,6 +143,30 @@ export class Session {
 
   async evaluate(script: string): Promise<any> {
     return this.page.evaluate(script);
+  }
+
+  async nativePaste(
+    content: string,
+    type: "html" | "text" | "base64_image",
+  ): Promise<void> {
+    switch (type) {
+      case "html":
+        Clipboard.setHtml(content);
+        break;
+      case "base64_image":
+        Clipboard.setImageBase64(content);
+        break;
+      case "text":
+      default:
+        Clipboard.setText(content);
+        break;
+    }
+    await this.page.bringToFront();
+    await this.page.keyboard.press("Meta+v");
+  }
+
+  async focus(selector: string): Promise<void> {
+    await this.page.locator(selector).focus();
   }
 
   // interceptors

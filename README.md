@@ -16,6 +16,8 @@ Built by [AI Agents A-Z](https://aiagentsaz.com)
 - Close a session
 - Navigate to a URL
 - Click an element
+- Focus an element
+- Paste in content from using the OS clipboard
 - Evaluate JavaScript
 - Take a screenshot
 - Reload the page

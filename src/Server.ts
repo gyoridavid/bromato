@@ -69,6 +69,8 @@ class Server {
       },
     );
 
+    // actions
+
     instance.post<{
       Body: {
         url: string;
@@ -122,6 +124,26 @@ class Server {
         reply
           .status(HTTPStatusCodes.OK)
           .send({ action: "click", target: request.body.selector });
+      },
+    );
+
+    instance.post<{ Body: { selector: string } }>(
+      "/focus",
+      {
+        schema: {
+          body: {
+            type: "object",
+            properties: { selector: { type: "string", minLength: 1 } },
+            required: ["selector"],
+          },
+        },
+      },
+      async (request, reply) => {
+        const session = request.session;
+        await session.focus(request.body.selector);
+        reply
+          .status(HTTPStatusCodes.OK)
+          .send({ action: "focus", target: request.body.selector });
       },
     );
 
@@ -218,6 +240,44 @@ class Server {
         }
       },
     );
+
+    instance.post<{
+      Body: {
+        content: string;
+        type: "html" | "text" | "base64_image";
+      };
+    }>(
+      "/native_paste",
+      {
+        schema: {
+          body: {
+            type: "object",
+            properties: {
+              content: { type: "string", minLength: 1 },
+              type: { type: "string", enum: ["html", "text", "base64_image"] },
+            },
+            required: ["content"],
+          },
+        },
+      },
+      async (request, reply) => {
+        const session = request.session;
+        try {
+          await session.nativePaste(request.body.content, request.body.type);
+          reply
+            .status(HTTPStatusCodes.OK)
+            .send({ status: "Content pasted to system clipboard" });
+        } catch (e) {
+          request.log.error(
+            { e, content: request.body.content },
+            "native paste error",
+          );
+          reply.status(500).send({ error: "Failed to perform native paste" });
+        }
+      },
+    );
+
+    // interceptors
 
     instance.post<{ Body: { urlPattern: string } }>(
       "/interceptors",
