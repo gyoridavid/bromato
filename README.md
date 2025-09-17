@@ -1,5 +1,8 @@
 <h1 align="center">
-  <img src="bromato_logo.png" alt="Bromato screenshot" width="300"/>
+  <img src="https://github.com/user-attachments/assets/1e53d754-a9e1-4ae1-9d18-9194d5aff144" alt="Bromato screenshot" width="300"/>
+  <p>
+    Local browser automation
+  </p>
 </h1>
 
 **Bromato** (bro-MAY-toe) is a local browser automation tool designed for no-code automation platforms like n8n and Make.
@@ -58,3 +61,4 @@ Bromato was built on top of these amazing open-source projects:
 - [Fastify](https://www.fastify.io/)
 - [localtunnel](https://localtunnel.github.io)
 - [Patchright](https://github.com/Kaliiiiiiiiii-Vinyzu/patchright)
+
