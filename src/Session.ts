@@ -79,6 +79,11 @@ class Interceptor {
   }
 }
 
+type navigationOptions = {
+  timeout?: number;
+  waitUntil?: "domcontentloaded" | "networkidle" | "load" | "commit";
+};
+
 export class Session {
   public id: string;
   public page: Page;
@@ -105,8 +110,7 @@ export class Session {
 
   async navigateTo(
     url: string,
-    timeout?: number,
-    waitUntil?: "domcontentloaded" | "networkidle" | "load" | "commit",
+    { timeout, waitUntil }: navigationOptions = {},
   ): Promise<number> {
     try {
       const response = await this.page.goto(url, {
@@ -122,15 +126,43 @@ export class Session {
     }
   }
 
+  async goBack({
+    timeout,
+    waitUntil,
+  }: navigationOptions = {}): Promise<number> {
+    const response = await this.page.goBack({
+      timeout,
+      waitUntil,
+    });
+    return response?.status() || HTTPStatusCodes.REQUEST_TIMEOUT;
+  }
+
+  async goForward({
+    timeout,
+    waitUntil,
+  }: navigationOptions = {}): Promise<number> {
+    const response = await this.page.goForward({
+      timeout,
+      waitUntil,
+    });
+    return response?.status() || HTTPStatusCodes.REQUEST_TIMEOUT;
+  }
+
+  async reload({
+    timeout = 30000,
+    waitUntil = "load",
+  }: navigationOptions = {}): Promise<number> {
+    const response = await this.page.reload({
+      timeout,
+      waitUntil,
+    });
+    return response?.status() || HTTPStatusCodes.REQUEST_TIMEOUT;
+  }
+
   async screenShot(fullPage: boolean = true): Promise<Buffer> {
     return this.page.screenshot({
       fullPage,
     });
-  }
-
-  async reload(): Promise<number> {
-    const response = await this.page.reload();
-    return response?.status() || HTTPStatusCodes.REQUEST_TIMEOUT;
   }
 
   async isVisible(selector: string): Promise<boolean> {

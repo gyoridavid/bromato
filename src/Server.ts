@@ -98,12 +98,108 @@ class Server {
       async (request, reply) => {
         const session = request.session;
         try {
-          const statusCode = await session.navigateTo(request.body.url);
+          const statusCode = await session.navigateTo(request.body.url, {
+            timeout: request.body.timeout,
+            waitUntil: request.body.waitUntil,
+          });
           reply.status(HTTPStatusCodes.OK).send({ status: statusCode });
         } catch (e) {
           request.log.error({ e, url: request.body.url }, "page load error");
           reply.status(500).send({ error: "Failed to navigate" });
         }
+      },
+    );
+
+    instance.post<{
+      Body: {
+        timeout?: number;
+        waitUntil?: "domcontentloaded" | "networkidle" | "load" | "commit";
+      };
+    }>(
+      "/go_back",
+      {
+        schema: {
+          body: {
+            type: "object",
+            properties: {
+              timeout: { type: "number", minimum: 0 },
+              waitUntil: {
+                type: "string",
+                enum: ["domcontentloaded", "networkidle", "load", "commit"],
+              },
+            },
+          },
+        },
+      },
+      async (request, reply) => {
+        const session = request.session;
+        const statusCode = await session.goBack({
+          timeout: request.body.timeout,
+          waitUntil: request.body.waitUntil,
+        });
+        reply.status(HTTPStatusCodes.OK).send({ status: statusCode });
+      },
+    );
+
+    instance.post<{
+      Body: {
+        timeout?: number;
+        waitUntil?: "domcontentloaded" | "networkidle" | "load" | "commit";
+      };
+    }>(
+      "/go_forward",
+      {
+        schema: {
+          body: {
+            type: "object",
+            properties: {
+              timeout: { type: "number", minimum: 0 },
+              waitUntil: {
+                type: "string",
+                enum: ["domcontentloaded", "networkidle", "load", "commit"],
+              },
+            },
+          },
+        },
+      },
+      async (request, reply) => {
+        const session = request.session;
+        const statusCode = await session.goForward({
+          timeout: request.body.timeout,
+          waitUntil: request.body.waitUntil,
+        });
+        reply.status(HTTPStatusCodes.OK).send({ status: statusCode });
+      },
+    );
+
+    instance.post<{
+      Body: {
+        timeout?: number;
+        waitUntil?: "domcontentloaded" | "networkidle" | "load" | "commit";
+      };
+    }>(
+      "/reload",
+      {
+        schema: {
+          body: {
+            type: "object",
+            properties: {
+              timeout: { type: "number", minimum: 0 },
+              waitUntil: {
+                type: "string",
+                enum: ["domcontentloaded", "networkidle", "load", "commit"],
+              },
+            },
+          },
+        },
+      },
+      async (request, reply) => {
+        const session = request.session;
+        const statusCode = await session.reload({
+          timeout: request.body.timeout,
+          waitUntil: request.body.waitUntil,
+        });
+        reply.status(HTTPStatusCodes.OK).send({ status: statusCode });
       },
     );
 
@@ -168,12 +264,6 @@ class Server {
           .send(screenshotBuffer);
       },
     );
-
-    instance.post("/reload", async (request, reply) => {
-      const session = request.session;
-      const statusCode = await session.reload();
-      reply.status(HTTPStatusCodes.OK).send({ status: statusCode });
-    });
 
     instance.post<{ Body: { selector: string } }>(
       "/is_visible",

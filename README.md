@@ -15,15 +15,12 @@ Built by [AI Agents A-Z](https://aiagentsaz.com)
 
 ## Features
 
-- Start a new session (new tab)
-- Close a session
-- Navigate to a URL
-- Click an element
-- Focus an element
+- Session management: creating a new session (tab), closing a session
+- Navigation: go to a URL, go back, go forward, reload
+- Element interactions: click, focus
 - Paste in content from using the OS clipboard
 - Evaluate JavaScript
 - Take a screenshot
-- Reload the page
 - Extract text/HTML/markdown content from the page
 - Add network request interceptors
 
@@ -53,6 +50,11 @@ Available options:
 - `-s --subdomain <string>`: Subdomain to use for the tunnel (default: random)
 - `-d --userdata <string>`: Path to the browser user data director (default: `~/.bromato/browser-user-data`)
 
+## Upcoming features
+
+- Expose Playwright findBy.. locators, filtering and actions
+- MCP server
+
 ## Acknowledgements
 
 Bromato was built on top of these amazing open-source projects:
@@ -61,4 +63,3 @@ Bromato was built on top of these amazing open-source projects:
 - [Fastify](https://www.fastify.io/)
 - [localtunnel](https://localtunnel.github.io)
 - [Patchright](https://github.com/Kaliiiiiiiiii-Vinyzu/patchright)
-
