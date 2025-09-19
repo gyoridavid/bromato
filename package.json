@@ -1,6 +1,6 @@
 {
   "name": "bromato",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Local browser automation for no-code tools like n8n or make",
   "main": "index.js",
   "scripts": {

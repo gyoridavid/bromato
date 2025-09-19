@@ -8,6 +8,7 @@ import {
   type Session,
 } from "./Session";
 import { htmlToMarkdown, htmlToText, selectHtml } from "./utils";
+import { executeLocatorChain, Instruction } from "./Locator";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -111,7 +112,7 @@ class Server {
     );
 
     instance.post<{
-      Body: {
+      Body?: {
         timeout?: number;
         waitUntil?: "domcontentloaded" | "networkidle" | "load" | "commit";
       };
@@ -134,15 +135,15 @@ class Server {
       async (request, reply) => {
         const session = request.session;
         const statusCode = await session.goBack({
-          timeout: request.body.timeout,
-          waitUntil: request.body.waitUntil,
+          timeout: request.body?.timeout,
+          waitUntil: request.body?.waitUntil,
         });
         reply.status(HTTPStatusCodes.OK).send({ status: statusCode });
       },
     );
 
     instance.post<{
-      Body: {
+      Body?: {
         timeout?: number;
         waitUntil?: "domcontentloaded" | "networkidle" | "load" | "commit";
       };
@@ -165,15 +166,15 @@ class Server {
       async (request, reply) => {
         const session = request.session;
         const statusCode = await session.goForward({
-          timeout: request.body.timeout,
-          waitUntil: request.body.waitUntil,
+          timeout: request.body?.timeout,
+          waitUntil: request.body?.waitUntil,
         });
         reply.status(HTTPStatusCodes.OK).send({ status: statusCode });
       },
     );
 
     instance.post<{
-      Body: {
+      Body?: {
         timeout?: number;
         waitUntil?: "domcontentloaded" | "networkidle" | "load" | "commit";
       };
@@ -196,8 +197,8 @@ class Server {
       async (request, reply) => {
         const session = request.session;
         const statusCode = await session.reload({
-          timeout: request.body.timeout,
-          waitUntil: request.body.waitUntil,
+          timeout: request.body?.timeout,
+          waitUntil: request.body?.waitUntil,
         });
         reply.status(HTTPStatusCodes.OK).send({ status: statusCode });
       },
@@ -363,6 +364,76 @@ class Server {
             "native paste error",
           );
           reply.status(500).send({ error: "Failed to perform native paste" });
+        }
+      },
+    );
+
+    // locator API
+
+    instance.post<{
+      Body: {
+        instructions: Instruction[][] | Instruction[];
+      };
+    }>(
+      "/locator/execute",
+      {
+        schema: {
+          body: {
+            type: "object",
+            properties: {
+              instructions: { type: "array", minItems: 1 },
+            },
+            required: ["instructions"],
+          },
+        },
+      },
+      async (request, reply) => {
+        const session = request.session;
+        try {
+          await executeLocatorChain(request.body.instructions, session.page);
+          reply.status(HTTPStatusCodes.OK).send({ status: "done" });
+        } catch (e) {
+          request.log.error(
+            { e, instructions: request.body.instructions },
+            "execute locator chain error",
+          );
+          reply
+            .status(500)
+            .send({ error: `Failed to execute locator chain, error: ${e}` });
+        }
+      },
+    );
+    instance.post<{
+      Body: {
+        instructions: Instruction[] | Instruction[][];
+      };
+    }>(
+      "/locator/get",
+      {
+        schema: {
+          body: {
+            type: "object",
+            properties: { instructions: { type: "array", minItems: 1 } },
+            required: ["instructions"],
+          },
+        },
+      },
+      async (request, reply) => {
+        const session = request.session;
+        try {
+          const result = await executeLocatorChain(
+            request.body.instructions,
+            session.page,
+          );
+          reply.status(HTTPStatusCodes.OK).send({ result });
+        } catch (e) {
+          request.log.error(
+            { e, instructions: request.body.instructions },
+            "execute locator chain error",
+          );
+          reply
+            .status(500)
+            .send({ error: `Failed to execute locator chain, error: ${e}` });
         }
       },
     );

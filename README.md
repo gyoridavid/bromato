@@ -23,6 +23,7 @@ Built by [AI Agents A-Z](https://aiagentsaz.com)
 - Take a screenshot
 - Extract text/HTML/markdown content from the page
 - Add network request interceptors
+- Exposed locator API to interact with Playwright locators
 
 ## Use-cases
 
@@ -52,7 +53,6 @@ Available options:
 
 ## Upcoming features
 
-- Expose Playwright findBy.. locators, filtering and actions
 - MCP server
 
 ## Acknowledgements
