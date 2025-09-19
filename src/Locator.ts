@@ -280,7 +280,7 @@ function runAction(locator: Locator, action: string, value?: any) {
     case "wait":
       return new Promise((resolve) => setTimeout(resolve, Number(value)));
     case "waitFor":
-      return locator.waitFor({ state: value || "visible", timeout: 5000 });
+      return locator.waitFor({ state: value || "visible", timeout: 15000 });
     default:
       throw new Error(
         `Invalid action: ${action}, must be one of ${validActions.join(", ")}`,
