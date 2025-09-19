@@ -100,6 +100,7 @@ export class Session {
       interceptor.destroy();
     }
     this.page.removeAllListeners();
+    await this.page.close();
   }
 
   // actions
