@@ -51,6 +51,10 @@ Available options:
 - `-s --subdomain <string>`: Subdomain to use for the tunnel (default: random)
 - `-d --userdata <string>`: Path to the browser user data director (default: `~/.bromato/browser-user-data`)
 
+## Documentation
+
+[API docs](docs.md)
+
 ## Upcoming features
 
 - MCP server
