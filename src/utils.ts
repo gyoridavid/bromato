@@ -1,7 +1,6 @@
 import { init as cuid2 } from "@paralleldrive/cuid2";
 import * as cheerio from "cheerio";
 import { NodeHtmlMarkdown } from "node-html-markdown";
-import fs from "fs-extra";
 
 export const createUniqueId = cuid2({
   length: 10,
