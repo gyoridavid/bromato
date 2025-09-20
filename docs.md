@@ -636,6 +636,7 @@ For targeting elements inside iframes:
 - `fill`: Fill input with text
 - `setChecked`: Set checkbox state
 - `selectOption`: Select option from dropdown
+- `setInputFiles`: Set files for file input elements
 - `pressSequentially`: Type text character by character
 - `press`: Press keyboard key
 - `focus`: Focus element
@@ -679,6 +680,50 @@ For targeting elements inside iframes:
   "operation": "waitFor",
   "value": "visible"
 }
+
+// Upload single file to file input
+{
+  "type": "action",
+  "operation": "setInputFiles",
+  "value": {
+    "extension": "txt",
+    "content": "SGVsbG8gd29ybGQh"
+  }
+}
+
+// Upload multiple files to file input
+{
+  "type": "action",
+  "operation": "setInputFiles",
+  "value": [
+    {
+      "extension": "txt",
+      "content": "SGVsbG8gd29ybGQh"
+    },
+    {
+      "extension": "csv",
+      "content": "bmFtZSxhZ2UKSm9obiwzMAo="
+    }
+  ]
+}
+```
+
+#### File Upload Details
+
+The `setInputFiles` operation accepts either a single file object or an array of file objects. Each file object has the following structure:
+
+- `extension` (string, required): File extension (e.g., "txt", "csv", "json", "pdf")
+- `content` (string, required): Base64-encoded file content
+
+**Examples of Base64 encoding:**
+
+```bash
+# Encode a text file
+echo "Hello world!" | base64
+# Output: SGVsbG8gd29ybGQhCg==
+
+# Encode a file from disk
+base64 < /path/to/your/file.txt
 ```
 
 ### Locator Getters
@@ -818,6 +863,55 @@ For targeting elements inside iframes:
       "operation": "selectOption",
       "value": "United States"
     }
+  ]
+}
+```
+
+#### Example 4: File Upload and Form Submission
+
+```json
+{
+  "instructions": [
+    [
+      {
+        "type": "locator",
+        "value": "input[type=\"file\"]"
+      },
+      {
+        "type": "action",
+        "operation": "setInputFiles",
+        "value": [
+          {
+            "extension": "txt",
+            "content": "SGVsbG8gd29ybGQh"
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "type": "getBy",
+        "operation": "label",
+        "value": "File description"
+      },
+      {
+        "type": "action",
+        "operation": "fill",
+        "value": "Sample text document"
+      }
+    ],
+    [
+      {
+        "type": "getBy",
+        "operation": "role",
+        "value": "button",
+        "options": { "name": "Upload" }
+      },
+      {
+        "type": "action",
+        "operation": "click"
+      }
+    ]
   ]
 }
 ```

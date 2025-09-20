@@ -1,5 +1,6 @@
 import HTTPStatusCodes from "http-status-codes";
 import Fastify, { type FastifyInstance, type FastifyReply } from "fastify";
+import fs from "fs-extra";
 
 import type SessionManager from "./SessionManager";
 import {
@@ -8,7 +9,12 @@ import {
   type Session,
 } from "./Session";
 import { htmlToMarkdown, htmlToText, selectHtml } from "./utils";
-import { executeLocatorChain, Instruction } from "./Locator";
+import {
+  executeLocatorChain,
+  fileUploadMiddleware,
+  Instruction,
+} from "./Locator";
+import { Config } from "./Config";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -21,10 +27,10 @@ const ErrorCantStartServer = new Error("Can't start server");
 class Server {
   private app: FastifyInstance;
   private sessionManager: SessionManager;
-  private port: number;
+  private config: Config;
   private shutdown?: () => Promise<void>;
-  constructor(port: number, sessionManager: SessionManager) {
-    this.port = port;
+  constructor(config: Config, sessionManager: SessionManager) {
+    this.config = config;
     this.app = Fastify({ logger: true });
     this.sessionManager = sessionManager;
     this.registerRoutes();
@@ -36,6 +42,7 @@ class Server {
       reply.send({ id: session.id });
     });
 
+    // session management
     instance.delete<{
       Params: { id: string };
     }>("/sessions/:id", async (request, reply) => {
@@ -53,6 +60,16 @@ class Server {
 
     instance.register(this.registerSessionRoutes.bind(this), {
       prefix: "/sessions/:id",
+    });
+
+    // utilities
+    instance.post("/empty_uploads", async (_, reply) => {
+      if (fs.existsSync(this.config.uploadsDir)) {
+        fs.emptydirSync(this.config.uploadsDir);
+      }
+      reply
+        .status(200)
+        .send({ status: "Uploads directory emptied successfully" });
     });
   }
 
@@ -390,7 +407,9 @@ class Server {
       async (request, reply) => {
         const session = request.session;
         try {
-          await executeLocatorChain(request.body.instructions, session.page);
+          await executeLocatorChain(request.body.instructions, session.page, [
+            fileUploadMiddleware(this.config.uploadsDir),
+          ]);
           reply.status(HTTPStatusCodes.OK).send({ status: "done" });
         } catch (e) {
           request.log.error(
@@ -568,9 +587,10 @@ class Server {
       return;
     }
     this.shutdown = shutdown;
+    const port = await this.config.port();
     this.app.listen(
       {
-        port: this.port,
+        port,
       },
       (err) => {
         if (err) {

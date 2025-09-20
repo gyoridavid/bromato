@@ -18,6 +18,7 @@ Built by [AI Agents A-Z](https://aiagentsaz.com)
 - Session management: creating a new session (tab), closing a session
 - Navigation: go to a URL, go back, go forward, reload
 - Element interactions: click, focus
+- File uploads: upload files to file input elements
 - Paste in content from using the OS clipboard
 - Evaluate JavaScript
 - Take a screenshot

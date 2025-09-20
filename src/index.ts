@@ -30,7 +30,7 @@ async function main() {
 
   const sessionManager = new SessionManager(browser.getContext());
 
-  const server = new Server(port, sessionManager);
+  const server = new Server(config, sessionManager);
 
   const shutdown = async () => {
     logger.info("Shutting down...");

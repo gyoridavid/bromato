@@ -1,4 +1,9 @@
 import { Locator, Page } from "patchright";
+import fs from "fs-extra";
+import z from "zod";
+
+import { createUniqueId } from "./utils";
+import { tmpdir } from "os";
 
 type RoleParameter =
   | "alert"
@@ -119,7 +124,7 @@ const validActions = [
   "selectOption",
   "pressSequentially",
   "press",
-  // "setInputFiles", // todo implement file uploads
+  "setInputFiles", // todo implement file uploads
   "focus",
   "blur",
   "check",
@@ -202,15 +207,21 @@ function parseOptions(page: Page, options: any) {
 export async function executeLocatorChain(
   items: Instruction[] | Instruction[][],
   page: Page,
+  middlewares: ((
+    instructions: Instruction[] | Instruction[][],
+  ) => Instruction[] | Instruction[][])[] = [],
 ) {
   if (items.length === 0) {
     throw new Error("Locator chain cannot be empty");
   }
   if (Array.isArray(items[0])) {
     for (const chain of items as Instruction[][]) {
-      await executeLocatorChain(chain, page);
+      await executeLocatorChain(chain, page, middlewares);
     }
     return;
+  }
+  for (const middleware of middlewares) {
+    items = middleware(items);
   }
   items = items as Instruction[];
   let locator = page.locator("body");
@@ -258,9 +269,8 @@ function runAction(locator: Locator, action: string, value?: any) {
       return locator.pressSequentially(value);
     case "press":
       return locator.press(value);
-    // todo implement file uploads
-    // case "setInputFiles":
-    //   return locator.setInputFiles(value);
+    case "setInputFiles":
+      return locator.setInputFiles(value);
     case "focus":
       return locator.focus();
     case "blur":
@@ -379,4 +389,68 @@ function runLocator(page: Page, locator: Locator, item: Instruction): Locator {
     default:
       throw new Error(`Unknown locator type: ${item.type}`);
   }
+}
+
+export function fileUploadMiddleware(
+  tmpDir: string,
+): (
+  instructions: Instruction[] | Instruction[][],
+) => Instruction[] | Instruction[][] {
+  const middleware = (
+    instructions: Instruction[] | Instruction[][],
+  ): Instruction[] | Instruction[][] => {
+    if (tmpDir === "") {
+      throw new Error("tmpDir must be provided for file uploads");
+    }
+    if (instructions.length === 0) {
+      return instructions;
+    }
+    if (Array.isArray(instructions[0])) {
+      return (instructions as Instruction[][]).map(
+        (chain) => middleware(chain) as Instruction[],
+      );
+    }
+    instructions = instructions as Instruction[];
+    return instructions.map((item) => {
+      if (item.type === "action" && item.operation === "setInputFiles") {
+        if (!Array.isArray(item.value)) {
+          item.value = [item.value];
+        }
+        const fileSchema = z.object({
+          extension: z.string(),
+          content: z.string(),
+        });
+        const parsed = z.array(fileSchema).safeParse(item.value);
+        if (!parsed.success) {
+          throw new Error(
+            `Invalid file upload format: ${parsed.error.issues
+              .map((i) => i.message)
+              .join(", ")}`,
+          );
+        }
+        const files = parsed.data.map((file) => {
+          if (file.content.startsWith("data:")) {
+            return {
+              extension: file.extension,
+              content: file.content.split("base64,")[1],
+            };
+          }
+          return file;
+        });
+
+        fs.ensureDirSync(tmpDir);
+
+        const filePaths = files.map((file) => {
+          const buffer = Buffer.from(file.content, "base64");
+          const path = `${tmpDir}/${createUniqueId()}.${file.extension}`;
+          fs.writeFileSync(path, buffer);
+          return path;
+        });
+
+        item.value = filePaths;
+      }
+      return item;
+    });
+  };
+  return middleware;
 }
