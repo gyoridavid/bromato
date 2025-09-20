@@ -1,6 +1,10 @@
 {
   "name": "bromato",
-  "version": "0.0.7",
+  "version": "0.0.8",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gyoridavid/bromato"
+  },
   "description": "Local browser automation for no-code tools like n8n or make",
   "main": "index.js",
   "scripts": {

@@ -5,11 +5,10 @@
   </p>
 </h1>
 
-**Bromato** (bro-MAY-toe) is a local browser automation tool designed for no-code automation platforms like n8n and Make.
-It starts a local server and starts a tunnel so even if your n8n instance is running on a VPS it can still connect to your local Bromato instance.
-You interact with the browser using HTTP requests to the Bromato server.
+**Bromato** (bro-MAY-toe) is a local browser automation tool, designed for no-code automation platforms like n8n, zapier and Make and custom scripts.
+It provides a simple HTTP API to control a browser on you local machine. It also provides a tunnel so you can use it from anywhere, even if your n8n instance is running on a VPS or located in n8n cloud.
 
-Built by [AI Agents A-Z](https://aiagentsaz.com)
+Built with ❤️ by [AI Agents A-Z](https://aiagentsaz.com)
 
 [![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UCloXqLhp_KGhHBe1kwaL2Tg)](https://aiagentsaz.com)
 
@@ -49,8 +48,8 @@ npx bromato
 Available options:
 
 - `-p --port <number>`: Port to run the Bromato server on (default: 3025)
-- `-s --subdomain <string>`: Subdomain to use for the tunnel (default: random)
-- `-d --userdata <string>`: Path to the browser user data director (default: `~/.bromato/browser-user-data`)
+- `-s --subdomain <string>`: Desired subdomain to use for the tunnel (default: random)
+- `-d --userdata <string>`: Path to the browser's user data directory (default: `~/.bromato/browser-user-data`)
 
 ## Documentation
 
